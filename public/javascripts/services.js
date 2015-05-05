@@ -22,6 +22,7 @@ angular.module('myapp.services', []).factory('Calendar', function ($http) {
             return $http.get('/' + id);
         }
 
+
     }
 
 

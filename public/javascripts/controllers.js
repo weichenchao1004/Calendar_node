@@ -120,6 +120,7 @@ angular.module('myapp.controllers', ['myapp.services']).controller('yearControll
 
     var arrays1 = [];
     var arrays2 = [];
+
     Calendar.getDay(+new Date($scope.year,$scope.months.indexOf($scope.month), $scope.day)).success(function(data){
 
         var timeslots = document.querySelectorAll('.oneHour');
@@ -135,13 +136,11 @@ angular.module('myapp.controllers', ['myapp.services']).controller('yearControll
             }
 
 
-
             if(arrays2[1] === '00'){
                 arrays2[1] = 0;
             }else{
                 arrays2[1] = 1;
             }
-
 
 
             var begin = arrays1[0] *2 + arrays1[1] ;
@@ -150,7 +149,8 @@ angular.module('myapp.controllers', ['myapp.services']).controller('yearControll
 
 
             for(var j = begin ; j < end; j ++){
-                    timeslots[j].innerHTML+=' ' + data[i].content;
+                createElement('div',timeslots[j],data[i].content,'appointments');
+
                     timeslots[j].style.background = '#CE7CFF';
 
             }
@@ -158,43 +158,6 @@ angular.module('myapp.controllers', ['myapp.services']).controller('yearControll
         }
     });
 
-
-
-    function mousemove(event){
-        var dates = event.target;
-        dates.style.background = 'mediumpurple';
-        dates.style.color = '#fff';
-        dates.className = 'purple';
-
-    }
-
-
-    document.querySelector('.hours').addEventListener('mousedown',function(event) {
-        var date1 = event.target;
-        console.log(date1.innerHTML);
-
-        document.querySelector('.hours').addEventListener('mousemove', mousemove);
-
-        document.querySelector('.hours').addEventListener('mouseup', function (event) {
-
-            var date2 = event.target;
-            console.log(date2.innerHTML);
-
-            var contentDiv = document.querySelector('.addContent');
-            contentDiv.style.display = 'block';
-            //$apply
-
-            $scope.$apply(function () {
-                $scope.hour1 = date1.innerHTML.trim().split(' ')[0].trim();
-                $scope.hour2 = date2.innerHTML.trim().split(' ')[0].trim();
-            })
-
-            document.querySelector('.hours').removeEventListener('mousemove', mousemove);
-
-        })
-
-
-    });
 
 
     $scope.create = function(data){
@@ -209,11 +172,13 @@ angular.module('myapp.controllers', ['myapp.services']).controller('yearControll
         for(var i = 0; i < backs.length; i++){
             backs[i].style.background = '#fff';
             backs[i].style.color = '#000';
+            backs[i].className = 'oneHour';
         }
 
         var arrays3 = $scope.hour1.split(':');
 
         var appts = {};
+
 
         appts.startTime = $scope.hour1;
         appts.endTime = $scope.hour2;
@@ -224,7 +189,35 @@ angular.module('myapp.controllers', ['myapp.services']).controller('yearControll
         Calendar.save(appts,appts.startDate);
 
 
-    };
+        var timeslots = document.querySelectorAll('.oneHour');
+
+            arrays1 = $scope.hour1.split(':');
+            arrays2 = $scope.hour2.split(':');
+
+            if(arrays1[1] === '00'){
+                arrays1[1] = 0;
+            }else{
+                arrays1[1] = 1;
+            }
+
+
+            if(arrays2[1] === '00'){
+                arrays2[1] = 0;
+            }else{
+                arrays2[1] = 1;
+            }
+
+
+            var begin = arrays1[0] *2 + arrays1[1] ;
+            var end = arrays2[0] *2 + arrays2[1]  + 1;
+
+            for(var i = begin; i < end; i ++){
+                createElement('div',timeslots[i],$scope.content,'appointments');
+            }
+
+
+
+        };
 
     function createElement(type, parent, innerHTML, className) {
         var element = document.createElement(type);
@@ -235,5 +228,81 @@ angular.module('myapp.controllers', ['myapp.services']).controller('yearControll
     };
 
 
+
+}).directive('nop',function(){
+    return {
+
+        compile: function (element, attrs) {
+            return {
+                pre: function (scope, iElement, attrs) {
+                },
+                post: function (scope, iElement, attrs) {
+                    console.log(iElement[0]);
+                    iElement[0].addEventListener('mousedown', function (e) {
+
+                        function mousemove(event){
+                            var dates = event.target;
+                            dates.style.background = 'mediumpurple';
+                            dates.style.color = '#fff';
+                            dates.className = 'purple';
+
+                        }
+
+                        iElement[0].addEventListener('mousemove',mousemove) ;
+
+                        iElement[0].addEventListener('mouseup',function(evt) {
+                            console.log('THis is from the mouseup' );
+
+                            var contentDiv = document.querySelector('.addContent');
+                            contentDiv.style.display = 'block';
+                            scope.$apply(function() {
+                                scope.hour1 = e.target.innerHTML.trim().split(' ')[0].trim();
+                                scope.hour2 = evt.target.innerHTML.trim().split(' ')[0].trim();
+                            });
+
+
+                            iElement[0].removeEventListener('mousemove',mousemove);
+                        })
+
+                    })
+                }
+            };
+        }
+
+
+
+        /*scope: false,
+        link: function(scope, elm){
+
+            console.log(elm[0]);
+            elm[0].addEventListener('mousedown', function (e) {
+
+                function mousemove(event){
+                    var dates = event.target;
+                    dates.style.background = 'mediumpurple';
+                    dates.style.color = '#fff';
+                    dates.className = 'purple';
+
+                }
+
+                elm[0].addEventListener('mousemove',mousemove) ;
+
+                elm[0].addEventListener('mouseup',function(evt) {
+                    console.log('THis is from the mouseup' );
+
+                    var contentDiv = document.querySelector('.addContent');
+                    contentDiv.style.display = 'block';
+                       scope.$apply(function() {
+                           scope.hour1 = e.target.innerHTML.trim().split(' ')[0].trim();
+                           scope.hour2 = evt.target.innerHTML.trim().split(' ')[0].trim();
+                       });
+
+
+                    elm[0].removeEventListener('mousemove',mousemove);
+                })
+
+            })
+        }*/
+    }
 
 });
